@@ -1,0 +1,242 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Nuvakin design tokens
+   Midnight Navy is the ground; Tangerine is the accent; Cobalt draws
+   structure; Dusty Taupe marks evidence and secondary information.
+------------------------------------------------------------------- */
+@theme {
+  --color-navy: #0b1020;
+  --color-navy-raised: #10172b;
+  --color-navy-deep: #080c19;
+  --color-cobalt: #4a6ed1;
+  --color-cobalt-text: #7e98e0;
+  --color-tangerine: #ff7a2a;
+  --color-tangerine-soft: #ff9a5c;
+  --color-taupe: #b59a90;
+  --color-ink: #f3ede5;
+  --color-ink-2: #b8b1aa;
+  --color-ink-3: #8c8680;
+  --color-rule: rgb(243 237 229 / 0.1);
+  --color-rule-strong: rgb(243 237 229 / 0.18);
+
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --ease-calm: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-navy);
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 6rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background: var(--color-navy);
+    color: var(--color-ink-2);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: rgb(255 122 42 / 0.32);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-tangerine);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Grain. A 160px tile of SVG fractal noise, rasterised once by the
+   browser and repeated on a fixed layer — no filters run per frame.
+------------------------------------------------------------------- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.92 0 0 0 0 0.88 0 0 0 1.4 -0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* ------------------------------------------------------------------
+   Typography utilities
+------------------------------------------------------------------- */
+@utility font-display {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-weight: 350;
+  letter-spacing: -0.022em;
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+@utility container-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 3rem;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Reveal on scroll. Hidden state applies only once JS has marked the
+   document, so content is always visible without JavaScript.
+------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 0.9s var(--ease-calm),
+      transform 0.9s var(--ease-calm);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .js [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Hero record — assembles once on load
+------------------------------------------------------------------- */
+@keyframes fragment-settle {
+  from {
+    opacity: 0;
+    transform: translate(var(--from-x, 0), var(--from-y, 0)) rotate(var(--from-r, 0deg));
+  }
+  to {
+    opacity: var(--rest-opacity, 1);
+    transform: rotate(var(--rest-r, 0deg));
+  }
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drop {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(74 110 209 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgb(74 110 209 / 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-fragment {
+    animation: fragment-settle 1.4s var(--ease-calm) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .hero-row {
+    animation: row-in 0.7s var(--ease-calm) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .hero-link {
+    transform-box: fill-box;
+    transform-origin: top;
+    animation: drop 0.9s var(--ease-calm) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .hero-fade {
+    animation: fade-in 1s var(--ease-calm) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  .pulse-dot {
+    animation: pulse-dot 3.2s ease-in-out 3s infinite;
+  }
+}
+
+.hero-fragment {
+  opacity: var(--rest-opacity, 1);
+  transform: rotate(var(--rest-r, 0deg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Fade used when interactive panels swap content */
+@media (prefers-reduced-motion: no-preference) {
+  .seq-fade {
+    animation: fade-in 0.6s var(--ease-calm) both;
+  }
+}
