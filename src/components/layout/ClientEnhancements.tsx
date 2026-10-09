@@ -10,8 +10,17 @@ import { track } from "@/lib/analytics";
  */
 export function ClientEnhancements() {
   useEffect(() => {
+    const root = document.documentElement;
+    // The inline guard in layout.tsx withdraws reveal styles unless this runs in time.
+    // If it already has, content is visible and there is nothing to animate.
+    if (!root.classList.contains("js")) return addCtaTracking();
+    root.classList.add("reveal-ready");
+
+    const targets = document.querySelectorAll("[data-reveal]");
+    let notified = false;
     const observer = new IntersectionObserver(
       (entries) => {
+        notified = true;
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           entry.target.classList.add("is-visible");
@@ -20,19 +29,31 @@ export function ClientEnhancements() {
       },
       { rootMargin: "0px 0px -8% 0px", threshold: 0.12 },
     );
-    document.querySelectorAll("[data-reveal]").forEach((el) => observer.observe(el));
-
-    const onClick = (event: MouseEvent) => {
-      const cta = (event.target as Element).closest<HTMLElement>("[data-track-cta]");
-      if (cta) track("waitlist_cta_click", { location: cta.dataset.trackCta ?? "unknown" });
-    };
-    document.addEventListener("click", onClick);
+    targets.forEach((el) => observer.observe(el));
+    // Observers always report once when observation starts. If that never arrives,
+    // the observer is broken; show everything rather than leave content hidden.
+    const fallback = window.setTimeout(() => {
+      if (notified) return;
+      observer.disconnect();
+      targets.forEach((el) => el.classList.add("is-visible"));
+    }, 2000);
+    const removeCtaTracking = addCtaTracking();
 
     return () => {
+      window.clearTimeout(fallback);
       observer.disconnect();
-      document.removeEventListener("click", onClick);
+      removeCtaTracking();
     };
   }, []);
 
   return null;
+}
+
+function addCtaTracking() {
+  const onClick = (event: MouseEvent) => {
+    const cta = (event.target as Element).closest<HTMLElement>("[data-track-cta]");
+    if (cta) track("waitlist_cta_click", { location: cta.dataset.trackCta ?? "unknown" });
+  };
+  document.addEventListener("click", onClick);
+  return () => document.removeEventListener("click", onClick);
 }

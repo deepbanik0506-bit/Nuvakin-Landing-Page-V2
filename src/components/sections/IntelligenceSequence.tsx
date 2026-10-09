@@ -116,7 +116,7 @@ export function IntelligenceSequence() {
   // Play through once when the sequence first comes into view.
   useEffect(() => {
     const el = root.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!el || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAutoplayed.current) {

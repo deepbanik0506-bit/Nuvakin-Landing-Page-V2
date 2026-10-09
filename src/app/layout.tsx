@@ -50,12 +50,16 @@ const organization = {
   ...(site.linkedinUrl ? { sameAs: [site.linkedinUrl] } : {}),
 };
 
+const revealGuard = `(function(){var d=document.documentElement;if(!("IntersectionObserver" in window))return;d.classList.add("js");setTimeout(function(){if(!d.classList.contains("reveal-ready"))d.classList.remove("js")},3000)})()`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${newsreader.variable} ${geist.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
-        {/* Marks the document as JS-enabled before paint so reveal styles never hide content without JS. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        {/* Opts into reveal styles before paint (no flash). Reveals only hide content while the client
+            can show it again: if the app hasn't hydrated and marked `reveal-ready` within 3s (blocked or
+            failed scripts, slow network), the opt-in is withdrawn and everything renders visible. */}
+        <script dangerouslySetInnerHTML={{ __html: revealGuard }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
       </head>
       <body>
